@@ -20,10 +20,14 @@ package net.ccbluex.liquidbounce.features.module.modules.render
 
 import com.mojang.blaze3d.pipeline.BlendFunction
 import com.mojang.blaze3d.pipeline.RenderPipeline
+import com.mojang.blaze3d.pipeline.RenderTarget
+import net.ccbluex.liquidbounce.config.types.group.Mode
+import net.ccbluex.liquidbounce.config.types.group.ModeValueGroup
 import net.ccbluex.liquidbounce.features.module.ClientModule
 import net.ccbluex.liquidbounce.features.module.ModuleCategories
 import net.ccbluex.liquidbounce.render.ClientRenderPipelines
 import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.rendertype.OutputTarget
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.client.renderer.rendertype.RenderSetup.OutlineProperty
 import net.minecraft.client.renderer.rendertype.RenderType
@@ -37,10 +41,32 @@ import java.util.function.Function
  */
 object ModuleChams: ClientModule("Chams", ModuleCategories.RENDER) {
 
+    private val mode = choices("Mode", 0) {
+        arrayOf(DepthBias)
+    }
+
+    private val outputTarget = OutputTarget("ChamsLayer") {
+        mode.activeMode.renderTarget
+    }
+
+    sealed class ChamsMode(name: String) : Mode("DepthBias") {
+        final override val parent: ModeValueGroup<*>
+            get() = mode
+
+        abstract val renderTarget: RenderTarget?
+    }
+
+    object DepthBias : ChamsMode("DepthBias") {
+        override val renderTarget: RenderTarget? get() = mc.mainRenderTarget
+    }
+
     private inline fun RenderPipeline.Builder.forChams() {
 //        withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         withDepthBias(1f, -10000000F)
     }
+
+    private inline fun RenderSetup.RenderSetupBuilder.forChams() =
+        setOutputTarget(outputTarget)
 
     private val PIPELINE_ENTITY_TRANSLUCENT: RenderPipeline =
         ClientRenderPipelines.newPipeline("chams/entity_translucent") {
@@ -81,6 +107,7 @@ object ModuleChams: ClientModule("Chams", ModuleCategories.RENDER) {
                 .affectsCrumbling()
                 .sortOnUpload()
                 .setOutline(if (affectsOutline) OutlineProperty.AFFECTS_OUTLINE else OutlineProperty.NONE)
+                .forChams()
                 .createRenderSetup()
             RenderType.create("entity_translucent", renderSetup)
         }
@@ -94,6 +121,7 @@ object ModuleChams: ClientModule("Chams", ModuleCategories.RENDER) {
                 .useOverlay()
                 .affectsCrumbling()
                 .setOutline(OutlineProperty.AFFECTS_OUTLINE)
+                .forChams()
                 .createRenderSetup()
             RenderType.create("entity_cutout", renderSetup)
         }
@@ -107,6 +135,7 @@ object ModuleChams: ClientModule("Chams", ModuleCategories.RENDER) {
                 .useOverlay()
                 .affectsCrumbling()
                 .setOutline(if (affectsOutline) OutlineProperty.AFFECTS_OUTLINE else OutlineProperty.NONE)
+                .forChams()
                 .createRenderSetup()
             RenderType.create("entity_cutout_no_cull", renderSetup)
         }
