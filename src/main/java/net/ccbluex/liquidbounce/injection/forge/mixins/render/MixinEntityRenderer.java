@@ -145,11 +145,11 @@ public abstract class MixinEntityRenderer {
 
             final Reach reach = Reach.INSTANCE;
 
-            double d0 = reach.handleEvents() ? reach.getMaxRange() : mc.playerController.getBlockReachDistance();
+            double d0 = reach.shouldApplyReach() ? reach.getMaxRange() : mc.playerController.getBlockReachDistance();
             Vec3 vec3 = entity.getPositionEyes(p_getMouseOver_1_);
             Rotation rotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
             Vec3 vec31 = RotationUtils.INSTANCE.getVectorForRotation(RotationUtils.INSTANCE.getCurrentRotation() != null && OverrideRaycast.INSTANCE.shouldOverride() ? RotationUtils.INSTANCE.getCurrentRotation() : rotation);
-            double p_rayTrace_1_ = (reach.handleEvents() ? reach.getBuildReach() : d0);
+            double p_rayTrace_1_ = (reach.shouldApplyReach() ? reach.getBuildReach() : d0);
             Vec3 vec32 = vec3.addVector(vec31.xCoord * p_rayTrace_1_, vec31.yCoord * p_rayTrace_1_, vec31.zCoord * p_rayTrace_1_);
             mc.objectMouseOver = entity.worldObj.rayTraceBlocks(vec3, vec32, false, false, true);
             double d1 = d0;
@@ -165,7 +165,7 @@ public abstract class MixinEntityRenderer {
                 d1 = mc.objectMouseOver.hitVec.distanceTo(vec3);
             }
 
-            if (reach.handleEvents()) {
+            if (reach.shouldApplyReach()) {
                 double p_rayTrace_1_2 = reach.getBuildReach();
                 Vec3 vec322 = vec3.addVector(vec31.xCoord * p_rayTrace_1_2, vec31.yCoord * p_rayTrace_1_2, vec31.zCoord * p_rayTrace_1_2);
                 final MovingObjectPosition movingObjectPosition = entity.worldObj.rayTraceBlocks(vec3, vec322, false, false, true);
@@ -220,7 +220,7 @@ public abstract class MixinEntityRenderer {
                 }
             }
 
-            if (pointedEntity != null && flag && vec3.distanceTo(vec33) > (reach.handleEvents() ? reach.getCombatReach() : 3)) {
+            if (pointedEntity != null && flag && vec3.distanceTo(vec33) > (reach.shouldApplyReach() ? reach.getCombatReach() : 3)) {
                 pointedEntity = null;
                 mc.objectMouseOver = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, Objects.requireNonNull(vec33), null, new BlockPos(vec33));
             }

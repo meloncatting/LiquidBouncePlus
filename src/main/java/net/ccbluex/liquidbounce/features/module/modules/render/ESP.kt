@@ -46,9 +46,14 @@ object ESP : Module("ESP", Category.RENDER) {
     val wireframeWidth by float("WireFrame-Width", 2f, 0.5f..5f) { mode == "WireFrame" }
 
     private val glowRenderScale by float("Glow-Renderscale", 1f, 0.5f..2f) { mode == "Glow" }
-    private val glowRadius by int("Glow-Radius", 4, 1..5) { mode == "Glow" }
+    private val glowRadius by int("Glow-Radius", 4, 1..10) { mode == "Glow" }
     private val glowFade by int("Glow-Fade", 10, 0..30) { mode == "Glow" }
     private val glowTargetAlpha by float("Glow-Target-Alpha", 0f, 0f..1f) { mode == "Glow" }
+    // Glow intensity: multiplies the effective radius so you can crank the bloom
+    private val glowIntensity by float("Glow-Intensity", 1f, 0.5f..3f) { mode == "Glow" }
+    // Use a separate colour for the glow halo instead of the shared ESP colour
+    private val glowCustomColor by boolean("Glow-CustomColor", false) { mode == "Glow" }
+    private val glowColor = ColorSettingsInteger(this, "GlowColor").with(255, 165, 0)
 
     private val espColor = ColorSettingsInteger(this, "ESPColor").with(255, 255, 255)
 
@@ -180,7 +185,9 @@ object ESP : Module("ESP", Category.RENDER) {
                     mc.renderManager.renderEntitySimple(entity, event.partialTicks)
                 }
 
-                GlowShader.stopDraw(color, glowRadius, glowFade, glowTargetAlpha)
+                val effectiveColor = if (glowCustomColor) glowColor.color() else color
+                val effectiveRadius = (glowRadius * glowIntensity).toInt().coerceIn(1, 30)
+                GlowShader.stopDraw(effectiveColor, effectiveRadius, glowFade, glowTargetAlpha)
             }
         } catch (ex: Exception) {
             LOGGER.error("An error occurred while rendering all entities for shader esp", ex)

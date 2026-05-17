@@ -162,7 +162,7 @@ object Aimbot : Module("Aimbot", Category.COMBAT) {
                 outborder = false,
                 predict = true,
                 lookRange = range,
-                attackRange = if (Reach.handleEvents()) Reach.combatReach else 3f,
+                attackRange = if (Reach.shouldApplyReach()) Reach.combatReach else 3f,
                 bodyPoints = listOf(highestBodyPointToTarget, lowestBodyPointToTarget),
                 horizontalSearch = horizontalBodySearchRange
             )

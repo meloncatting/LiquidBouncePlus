@@ -239,7 +239,7 @@ object TimerRange : Module("TimerRange", Category.COMBAT) {
             outborder = false,
             predict = true,
             lookRange = if (timerBoostMode == "Normal") rangeValue else randomRange,
-            attackRange = if (Reach.handleEvents()) Reach.combatReach else 3f,
+            attackRange = if (Reach.shouldApplyReach()) Reach.combatReach else 3f,
         )
 
         if (distance == null) {
